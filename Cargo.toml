@@ -1,0 +1,31 @@
+[package]
+authors = ["mmacedoeu <contato@mmacedo.eu.org>"]
+name = "subimage"
+version = "0.1.0"
+[dependencies]
+actix = "0.7"
+clap = "2.32"
+derive-error-chain = "0.11"
+env_logger = "0.5"
+error-chain = "0.11"
+failure = "0.1"
+futures = "0.1"
+tokio = "0.1.7"
+log = "0.4"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"
+flame = { version = "0.2.2", optional = true }
+flamer = { version = "^0.2.1", optional = true }
+
+[dependencies.cv]
+git = "https://github.com/mmacedoeu/cv-rs.git"
+
+[features]
+default = []
+flame_it = ["flame", "flamer"]
+
+[profile.release]
+lto = true
+opt-level = 3
+codegen-units = 1
