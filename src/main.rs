@@ -9,6 +9,7 @@ extern crate failure;
 extern crate flame;
 extern crate futures;
 extern crate tokio;
+extern crate differential_dataflow;
 
 #[macro_use]
 extern crate clap;

@@ -7,20 +7,49 @@ Waldo is program to check if images is a cropped part of the other one:
 
 ## Features
 
-* Async/Sync [actors](https://github.com/actix/actix).
-* Actor communication in a local/thread context.
-* Uses [Futures](https://crates.io/crates/futures) for asynchronous message handling.
-* Typed messages (No `Any` type).
-* [OpenCV 3](https://opencv.org/)
-* Speeded up robust features [SURF](https://en.wikipedia.org/wiki/Speeded_up_robust_features)
+- [x] Async/Sync [actors](https://github.com/actix/actix).
+- [x] Actor communication in a local/thread context.
+- [x] Uses [Futures](https://crates.io/crates/futures) for asynchronous message handling.
+- [x] Typed messages (No `Any` type).
+- [x] [OpenCV 3](https://opencv.org/)
+- [x] Speeded up robust features [SURF](https://en.wikipedia.org/wiki/Speeded_up_robust_features)
 
-## Not Featured
+## Goals
 
-* Preprocessing scaling optimization
+- [ ] Parallelism with [Scatter-Gather](http://www.enterpriseintegrationpatterns.com/patterns/messaging/BroadcastAggregate.html) Pattern over Graph processing system
+- [ ] Efficient partitioning and scheduling of computer vision and image processing data on bus networks using divisible load analysis [DLA](http://www.s3lab.ece.ufl.edu/publication/ivc2000.pdf)
+- [ ] Image Processing Using [Graphs](http://www.cb.uu.se/~filip/ImageProcessingUsingGraphs/LectureNotes/Lecture1.pdf)
+- [ ] Multi scaling [analysis](https://en.wikipedia.org/wiki/Pyramid_(image_processing))
+- [ ] [Differential Dataflow](https://github.com/frankmcsherry/differential-dataflow)
+
+## Background
+
+### About the problem
+
+Detecting a lossy image/object is the start of the most advanced image processing field. It could develop to harder problems like face recognition and medical image analysis.
+
+### Base solution and optimization evolutions
+
+The base solution consist on image features detecting and description extraction on a query image and also on the scene image target them searching for a match of the two. The descriptors must be closed enough on the scene in order to eliminated scathered descriptors providing false positives.
+
+By features you have a number of algorithms like SURF we are using here and you also train a set of objects, like a set of selfies, using deep learning in order to have optimized features and later detected them on the scene.
+
+The solution here use a know algorithm Speeded up robust features [SURF](https://en.wikipedia.org/wiki/Speeded_up_robust_features).
+
+Optimization on search space could be done by pre processing the image to a single channel, grayscale, and dimension scaling to 1/2, 1/4, 1/8 the original size. There is a mininum size where you get the best speed/precision compromise.
+![alt text](https://docs.opencv.org/3.4.1/Pyramids_Tutorial_Pyramid_Theory.png "A set of layers in which the higher the layer, the smaller the size.")
+
+Partition space and representation optimization could be done by dividing the work to a multi core computer or cluster of computers in order to get almost linear speedups. By representing the original image in a graph with data and responsabilities you can submit the problem to be solved in Distributed Dataflow graph processing systems like GraphX. But you can further optimize it's efficiency by using [Differential Dataflow](https://github.com/frankmcsherry/differential-dataflow/blob/master/differentialdataflow.pdf). With Differential Dataflow you also get perfomance due to [COST analysis](http://www.frankmcsherry.org/graph/scalability/cost/2015/01/15/COST.html).
+
+### Resilience to failures
+
+The immutability nature and functional approach makes it easy to resume faulty computations by storing and retrieving it's state on it's internal data store see: (https://github.com/frankmcsherry/differential-dataflow#fault-tolerance)
+
+Our solution also implements the Actor model by using the actix framework and it means Actor could be back to action by it's [supervisor](https://www.queryhome.com/tech/133270/what-is-the-supervisor-or-supervision-concept-in-actor-model)
 
 ## Working prototype
 
-There is a working python prototype running under folder prototype
+There is a working python prototype running under folder prototype, it is a proof of concept without performance optimization like pyramid or image partition but demostrate the solution works
 
 Display help:
 
@@ -85,7 +114,7 @@ Run with full trace:
 
 Run with no logging:
 
-`./target/release/swapi -l warn <IMAGE1> <IMAGE2>`
+`./target/release/subimage -l warn <IMAGE1> <IMAGE2>`
 
 ## Testing
 
