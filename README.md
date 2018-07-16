@@ -41,6 +41,16 @@ Optimization on search space could be done by pre processing the image to a sing
 
 Partition space and representation optimization could be done by dividing the work to a multi core computer or cluster of computers in order to get almost linear speedups. By representing the original image in a graph with data and responsabilities you can submit the problem to be solved in Distributed Dataflow graph processing systems like GraphX. But you can further optimize it's efficiency by using [Differential Dataflow](https://github.com/frankmcsherry/differential-dataflow/blob/master/differentialdataflow.pdf). With Differential Dataflow you also get perfomance due to [COST analysis](http://www.frankmcsherry.org/graph/scalability/cost/2015/01/15/COST.html).
 
+### Robustness and tradeoffs
+
+Since the problem is somewhat relaxed by detecting just cropped images on another image, other algorithms could probably be applied like [Parametric Image Alignment using Enhanced Correlation Coefficient Maximization](http://xanthippi.ceid.upatras.gr/people/evangelidis/george_files/PAMI_2008.pdf)
+which determine the translation transform with main advantages:
+
+*Unlike the traditional similarity measure of difference in pixel intensities, ECC is invariant to photometric distortions in contrast and brightness.
+*Although the objective function is nonlinear function of the parameters, the iterative scheme to solve the optimization problem is linear. In other words, a problem that looks computationally expensive on the surface and uses a simpler way to solve it iteratively.
+
+But since the problem itself is more simple than face detecting for example it means not using a feature based solution the problem itself could not be evolved to more complex ones. So I decided to stick with features based solution mainly for this while also gaining robustness using lossy images with quality as low as 10% and still have accuracy.
+
 ### Resilience to failures
 
 The immutability nature and functional approach makes it easy to resume faulty computations by storing and retrieving it's state on it's internal data store see: (https://github.com/frankmcsherry/differential-dataflow#fault-tolerance)
@@ -71,6 +81,9 @@ optional arguments:
 ## Install
 
 You need to manually install [OpenCV 3](https://www.learnopencv.com/install-opencv3-on-ubuntu/)
+
+The recommended version is the one present at https://github.com/mmacedoeu/cv-rs
+which is the one the binding is tested against. You can also reuse the installation script used by CI at https://github.com/mmacedoeu/cv-rs/blob/master/.ci/travis_build_opencv.sh
 
 To compile and install you need to first install Rust [compiler](https://www.rust-lang.org/en-US/install.html)
 
@@ -135,3 +148,13 @@ Python Prototype outputs an image on current folder with selfie highlighted with
 ## Progress
 
 Rust version is now barely some scafolding project but still reading images with openCV. Due to lack of complete and official openCV binding for rust the only one avaliable is incomplete and some functions used on the prototype are missing like findHomography and perspectiveTransform. Provided enough time I will try to include those functions myself.
+
+## Evolution
+
+This solution could evolve to deep learning based feature detection using CUDA or OpenCL while also retaining it's main graph based Differential Dataflow
+
+## Runtime characteristics
+
+By using the rust language which features minimum runtime library and overhead while also don't make use of Garbage Collectors for memory management means you have not all the penalties of other languages and graph solutions under stress conditions like facebook research have show on this [article](https://code.fb.com/core-data/a-comparison-of-state-of-the-art-graph-processing-systems/) "...when the machines start getting low on memory, performance drops dramatically. This happens at a different number of machines for Giraph and GraphX." So our system have predictable runtime characteristics and don't sufer from such performance degradation under stress load and states of low memory avaliable.
+
+By evaluating the [COST](http://www.frankmcsherry.org/graph/scalability/cost/2015/01/15/COST.html) you can see the runtime characteristics of our solution is scalable to order of magnitude better than know graph processing systems like graphX: "With 128x as many cores, none of the scalable systems consistently out-perform a single thread at PageRank, which is probably one of the simplest graph computations (sparse matrix-vector multiplications). The systems are almost a factor of two slower than the single-threaded implementation for label propagation."
