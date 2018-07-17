@@ -30,26 +30,26 @@ Detecting a lossy image/object is the start of the most advanced image processin
 
 ### Base solution and optimization evolutions
 
-The base solution consist on image features detecting and description extraction on a query image and also on the scene image target them searching for a match of the two. The descriptors must be closed enough on the scene in order to eliminated scathered descriptors providing false positives.
+The base solution consist on image features detecting and description extraction on a query image and also on the scene image and searching for a match of the two. The descriptors must be closed enough on the scene in order to eliminate scathered descriptors providing false positives.
 
-By features you have a number of algorithms like SURF we are using here and you also train a set of objects, like a set of selfies, using deep learning in order to have optimized features and later detected them on the scene.
+By features you have a number of algorithms, like SURF we are using here, and you could also train a set of objects, like a set of selfies, using deep learning in order to have optimized features and later detected them on the scene.
 
-The solution here use a know algorithm Speeded up robust features [SURF](https://en.wikipedia.org/wiki/Speeded_up_robust_features).
+The solution here use a know algorithm know as Speeded up robust features [SURF](https://en.wikipedia.org/wiki/Speeded_up_robust_features).
 
 Optimization on search space could be done by pre processing the image to a single channel, grayscale, and dimension scaling to 1/2, 1/4, 1/8 the original size. There is a mininum size where you get the best speed/precision compromise.
 ![alt text](https://docs.opencv.org/3.4.1/Pyramids_Tutorial_Pyramid_Theory.png "A set of layers in which the higher the layer, the smaller the size.")
 
-Partition space and representation optimization could be done by dividing the work to a multi core computer or cluster of computers in order to get almost linear speedups. By representing the original image in a graph with data and responsabilities you can submit the problem to be solved in Distributed Dataflow graph processing systems like GraphX. But you can further optimize it's efficiency by using [Differential Dataflow](https://github.com/frankmcsherry/differential-dataflow/blob/master/differentialdataflow.pdf). With Differential Dataflow you also get perfomance due to [COST analysis](http://www.frankmcsherry.org/graph/scalability/cost/2015/01/15/COST.html).
+[Partition search space](https://en.wikipedia.org/wiki/Image_segmentation) and representation optimization could be done by dividing the work to a multi core computer or cluster of computers in order to get almost linear speedups. By representing the original image in a graph with data and responsibilities you can submit the problem to be solved in Distributed Dataflow graph processing systems like GraphX. But you can further optimize it's efficiency by using [Differential Dataflow](https://github.com/frankmcsherry/differential-dataflow/blob/master/differentialdataflow.pdf). With Differential Dataflow you also get perfomance due to [COST analysis](http://www.frankmcsherry.org/graph/scalability/cost/2015/01/15/COST.html).
 
 ### Robustness and tradeoffs
 
 Since the problem is somewhat relaxed by detecting just cropped images on another image, other algorithms could probably be applied like [Parametric Image Alignment using Enhanced Correlation Coefficient Maximization](http://xanthippi.ceid.upatras.gr/people/evangelidis/george_files/PAMI_2008.pdf)
 which determine the translation transform with main advantages:
 
-*Unlike the traditional similarity measure of difference in pixel intensities, ECC is invariant to photometric distortions in contrast and brightness.
-*Although the objective function is nonlinear function of the parameters, the iterative scheme to solve the optimization problem is linear. In other words, a problem that looks computationally expensive on the surface and uses a simpler way to solve it iteratively.
+* Unlike the traditional similarity measure of difference in pixel intensities, ECC is invariant to photometric distortions in contrast and brightness;
+* Although the objective function is nonlinear function of the parameters, the iterative scheme to solve the optimization problem is linear. In other words, a problem that looks computationally expensive on the surface uses a simpler way to solve it iteratively;
 
-But since the problem itself is more simple than face detecting for example it means not using a feature based solution the problem itself could not be evolved to more complex ones. So I decided to stick with features based solution mainly for this while also gaining robustness using lossy images with quality as low as 10% and still have accuracy.
+Or [Template matching](https://en.wikipedia.org/wiki/Template_matching) but since features based matching have advantages with partial matching in a segmented image it could scale better in a cluster of computers. So I decided to stick with features based solution mainly for this while also gaining robustness using lossy images with quality as low as 10% and still have accuracy.
 
 ### Resilience to failures
 
